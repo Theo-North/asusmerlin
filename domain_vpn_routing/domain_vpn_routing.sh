@@ -4609,10 +4609,15 @@ while [[ -z "${systemparameterssync+x}" ]] &>/dev/null || [[ "$systemparameterss
     OVPNC4IPV6ADDR="$(awk '$1 == "ifconfig-ipv6" {print $2}' /etc/openvpn/client4/config.ovpn 2>/dev/null | grep -oE "(([[:xdigit:]]{1,4}::?){1,7}[[:xdigit:]|::]{1,4})")"
   fi
 
-  # OVPNC4RGW
-  if [[ -z "${OVPNC4RGW+x}" ]] &>/dev/null;then
-    OVPNC4RGW="$(nvram get vpn_client4_rgw & nvramcheck)"
-    [[ -n "$OVPNC4RGW" ]] &>/dev/null || { logger -p 6 -t "$ALIAS" "Debug - failed to set OVPNC4RGW" && unset OVPNC4RGW && continue ;}
+  # Check if the OVPNC4 interface exists
+  if ip link show tun14 &>/dev/null; then
+    # OVPNC4RGW
+    if [[ -z "${OVPNC4RGW+x}" ]] &>/dev/null; then
+      OVPNC4RGW="$(nvram get vpn_client4_rgw & nvramcheck)"
+      [[ -n "$OVPNC4RGW" ]] &>/dev/null || { logger -p 6 -t "$ALIAS" "Debug - failed to set OVPNC4RGW" && unset OVPNC4RGW && continue ;}
+    fi
+  else
+    logger -p 6 -t "$ALIAS" "OVPNC4 interface not found, skipping configuration."
   fi
 
   # OVPNC4IPV6VPNGW
@@ -4636,10 +4641,15 @@ while [[ -z "${systemparameterssync+x}" ]] &>/dev/null || [[ "$systemparameterss
     OVPNC5IPV6ADDR="$(awk '$1 == "ifconfig-ipv6" {print $2}' /etc/openvpn/client5/config.ovpn 2>/dev/null | grep -oE "(([[:xdigit:]]{1,4}::?){1,7}[[:xdigit:]|::]{1,4})")"
   fi
 
-  # OVPNC5RGW
-  if [[ -z "${OVPNC5RGW+x}" ]] &>/dev/null;then
-    OVPNC5RGW="$(nvram get vpn_client5_rgw & nvramcheck)"
-    [[ -n "$OVPNC5RGW" ]] &>/dev/null || { logger -p 6 -t "$ALIAS" "Debug - failed to set OVPNC5RGW" && unset OVPNC5RGW && continue ;}
+  # Check if the OVPNC5 interface exists
+  if ip link show tun15 &>/dev/null; then
+    # OVPNC5RGW
+    if [[ -z "${OVPNC5RGW+x}" ]] &>/dev/null; then
+      OVPNC5RGW="$(nvram get vpn_client5_rgw & nvramcheck)"
+      [[ -n "$OVPNC5RGW" ]] &>/dev/null || { logger -p 6 -t "$ALIAS" "Debug - failed to set OVPNC5RGW" && unset OVPNC5RGW && continue ;}
+    fi
+  else
+    logger -p 6 -t "$ALIAS" "OVPNC5 interface not found, skipping configuration."
   fi
 
   # OVPNC5IPV6VPNGW
