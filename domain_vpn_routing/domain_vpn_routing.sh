@@ -4577,10 +4577,15 @@ while [[ -z "${systemparameterssync+x}" ]] &>/dev/null || [[ "$systemparameterss
     OVPNC3IPV6ADDR="$(awk '$1 == "ifconfig-ipv6" {print $2}' /etc/openvpn/client3/config.ovpn 2>/dev/null | grep -oE "(([[:xdigit:]]{1,4}::?){1,7}[[:xdigit:]|::]{1,4})")"
   fi
 
-  # OVPNC3RGW
-  if [[ -z "${OVPNC3RGW+x}" ]] &>/dev/null;then
-    OVPNC3RGW="$(nvram get vpn_client3_rgw & nvramcheck)"
-    [[ -n "$OVPNC3RGW" ]] &>/dev/null || { logger -p 6 -t "$ALIAS" "Debug - failed to set OVPNC3RGW" && unset OVPNC3RGW && continue ;}
+  # Check if the OVPNC3 interface exists
+  if ip link show tun13 &>/dev/null; then
+    # OVPNC3RGW
+    if [[ -z "${OVPNC3RGW+x}" ]] &>/dev/null; then
+      OVPNC3RGW="$(nvram get vpn_client3_rgw & nvramcheck)"
+      [[ -n "$OVPNC3RGW" ]] &>/dev/null || { logger -p 6 -t "$ALIAS" "Debug - failed to set OVPNC3RGW" && unset OVPNC3RGW && continue ;}
+    fi
+  else
+    logger -p 6 -t "$ALIAS" "OVPNC3 interface not found, skipping configuration."
   fi
 
   # OVPNC3IPV6VPNGW
